@@ -1,0 +1,14 @@
+{
+	"name": "pixelcollective/sup",
+	"type": "wordpress-plugin",
+	"require": {
+		"composer/installers": "~1.0",
+		"aws/aws-sdk-php": "~3.18",
+		"james-heinrich/getid3": "^1.9"
+   },
+   "autoload": {
+     "psr-4": {
+       "TinyPixel\\SUP\\": "SUP/"
+     }
+   }
+}
