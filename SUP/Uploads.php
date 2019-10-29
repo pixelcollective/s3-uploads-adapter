@@ -111,18 +111,18 @@ class Uploads
      */
     public function filterParameters() : void
     {
-        $this->env        = apply_filter('sup_env',         $this->env);
-        $this->acl        = apply_filter('sup_acl',         $this->acl);
-        $this->local      = apply_filter('sup_local',       $this->local);
-        $this->region     = apply_filter('sup_region',      $this->region);
-        $this->bucket     = apply_filter('sup_bucket',      $this->bucket);
-        $this->key        = apply_filter('sup_key',         $this->key);
-        $this->secret     = apply_filter('sup_secret',      $this->secret);
-        $this->endpoint   = apply_filter('sup_endpoint',    $this->endpoint);
-        $this->signature  = apply_filter('sup_signature',   $this->signature);
-        $this->bucketPath = apply_filter('sup_bucket_path', $this->bucketPath);
-        $this->bucketUrl  = apply_filter('sup_bucket_url',  $this->bucketUrl);
-        $this->editor     = apply_filter('sup_editor',      $this->editor);
+        $this->env        = apply_filters('sup_env',         $this->env);
+        $this->acl        = apply_filters('sup_acl',         $this->acl);
+        $this->local      = apply_filters('sup_local',       $this->local);
+        $this->region     = apply_filters('sup_region',      $this->region);
+        $this->bucket     = apply_filters('sup_bucket',      $this->bucket);
+        $this->key        = apply_filters('sup_key',         $this->key);
+        $this->secret     = apply_filters('sup_secret',      $this->secret);
+        $this->endpoint   = apply_filters('sup_endpoint',    $this->endpoint);
+        $this->signature  = apply_filters('sup_signature',   $this->signature);
+        $this->bucketPath = apply_filters('sup_bucket_path', $this->bucketPath);
+        $this->bucketUrl  = apply_filters('sup_bucket_url',  $this->bucketUrl);
+        $this->editor     = apply_filters('sup_editor',      $this->editor);
     }
 
     /**
