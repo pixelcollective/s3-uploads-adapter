@@ -68,7 +68,7 @@ class Uploads
         string $signature
     ) {
         $this->env    = defined('WP_ENV')                ? WP_ENV                : null;
-        $this->objAcl = defined('S3_UPLOADS_OBJECT_ACL') ? S3_UPLOADS_OBJECT_ACL : 'public-read';
+        $this->acl = defined('S3_UPLOADS_OBJECT_ACL')    ? S3_UPLOADS_OBJECT_ACL : 'public-read';
         $this->local  = defined('S3_UPLOADS_USE_LOCAL')  ? S3_UPLOADS_USE_LOCAL  : false;
 
         $this->region    = $region;
@@ -80,24 +80,49 @@ class Uploads
 
         $this->bucketPath = "s3://{$this->bucket}/{$this->env}/app";
         $this->bucketUrl  = "https://{$this->bucket}.{$this->region}.cdn.digitaloceanspaces.com";
+
+        $this->editor     = '\\TinyPixel\\SUP\\ImageEditorImagick';
     }
 
     /**
      * Setup the hooks, urls filtering etc for S3 Uploads
+     *
+     * @return void
      */
-    public function setup()
+    public function setup() : void
     {
+        $this->filterParameters();
         $this->configureClient();
         $this->registerStreamWrapper();
 
-        add_filter('upload_dir',                   [$this, 'filterUploadDir']);
-        add_filter('wp_image_editors',             [$this, 'filterEditors'], 9);
-        add_filter('wp_read_image_metadata',       [$this, 'filterMetadata'], 10, 2);
-        add_filter('wp_resource_hints',            [$this, 'filterResourceHints'], 10, 2);
-        add_action('delete_attachment',            [$this, 'deleteAttachment']);
+        add_filter('upload_dir', [$this, 'filterUploadDir']);
+        add_filter('wp_image_editors', [$this, 'filterEditors'], 9);
+        add_filter('wp_read_image_metadata', [$this, 'filterMetadata'], 10, 2);
+        add_filter('wp_resource_hints', [$this, 'filterResourceHints'], 10, 2);
+        add_action('delete_attachment', [$this, 'deleteAttachment']);
         add_action('wp_handle_sideload_prefilter', [$this, 'sideload']);
+        remove_filter('admin_notices', 'wpthumb_errors');
+    }
 
-		remove_filter('admin_notices', 'wpthumb_errors');
+    /**
+     * Filter parameters
+     *
+     * @return void
+     */
+    public function filterParameters() : void
+    {
+        $this->env        = apply_filter('sup_env',         $this->env);
+        $this->acl        = apply_filter('sup_acl',         $this->acl);
+        $this->local      = apply_filter('sup_local',       $this->local);
+        $this->region     = apply_filter('sup_region',      $this->region);
+        $this->bucket     = apply_filter('sup_bucket',      $this->bucket);
+        $this->key        = apply_filter('sup_key',         $this->key);
+        $this->secret     = apply_filter('sup_secret',      $this->secret);
+        $this->endpoint   = apply_filter('sup_endpoint',    $this->endpoint);
+        $this->signature  = apply_filter('sup_signature',   $this->signature);
+        $this->bucketPath = apply_filter('sup_bucket_path', $this->bucketPath);
+        $this->bucketUrl  = apply_filter('sup_bucket_url',  $this->bucketUrl);
+        $this->editor     = apply_filter('sup_editor',      $this->editor);
     }
 
     /**
@@ -112,14 +137,14 @@ class Uploads
         } else {
             StreamWrapper::register($this->getClient());
 
-            stream_context_set_option(stream_context_get_default(), 's3', 'ACL', $this->objAcl);
+            stream_context_set_option(stream_context_get_default(), 's3', 'ACL', $this->acl);
         }
 
         stream_context_set_option(stream_context_get_default(), 's3', 'seekable', true);
     }
 
     /**
-     * Configure S3
+     * Configure S3 client
      *
      * @return void
      */
@@ -138,7 +163,7 @@ class Uploads
     }
 
     /**
-     * S3Client instance
+     * Get S3 client instance
      *
      * @return Aws\S3\S3Client
      */
@@ -167,7 +192,7 @@ class Uploads
         $dirs['url']     = str_replace("s3://{$this->bucket}", $this->bucketUrl, $dirs['path']);
         $dirs['baseurl'] = str_replace("s3://{$this->bucket}", $this->bucketUrl, $dirs['basedir']);
 
-        return apply_filters('s3_uploads_dirs', $dirs);
+        return apply_filters('sup_uploads_dirs', $dirs);
     }
 
     /**
@@ -210,7 +235,7 @@ class Uploads
             unset($editors[$position]);
         }
 
-        array_unshift($editors, '\\TinyPixel\\SUP\\ImageEditorImagick');
+        array_unshift($editors, $this->editor);
 
         return $editors;
     }
@@ -302,10 +327,10 @@ class Uploads
      */
     public function getOriginalUploadDir() : array
     {
-		if (empty($this->originalUploadDir)) {
-			return $this->originalUploadDir = wp_upload_dir();
+        if (empty($this->originalUploadDir)) {
+            return $this->originalUploadDir = wp_upload_dir();
         }
 
-		return $this->originalUploadDir;
-	}
+        return $this->originalUploadDir;
+    }
 }
