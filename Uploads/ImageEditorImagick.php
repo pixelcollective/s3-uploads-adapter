@@ -1,5 +1,5 @@
 <?php
-namespace TinyPixel\SUP;
+namespace TinyPixel\Uploads;
 
 use \WP_Image_Editor_Imagick;
 use \Imagick;
@@ -8,7 +8,7 @@ use \WP_Error;
 /**
  * Image Editor Imagick
  *
- * @package TinyPixel\SUP
+ * @package TinyPixel\Uploads
  */
 class ImageEditorImagick extends WP_Image_Editor_Imagick
 {

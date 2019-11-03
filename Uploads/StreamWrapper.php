@@ -1,5 +1,5 @@
 <?php
-namespace TinyPixel\SUP;
+namespace TinyPixel\Uploads;
 
 use Aws\S3\S3ClientInterface;
 use Aws\CacheInterface;
@@ -14,7 +14,7 @@ use Psr\Http\Message\StreamInterface;
 /**
  * Stream Wrapper
  *
- * @package TinyPixel\SUP
+ * @package TinyPixel\Uploads
  */
 class StreamWrapper
 {

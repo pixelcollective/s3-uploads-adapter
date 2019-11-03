@@ -1,12 +1,12 @@
 <?php
-namespace TinyPixel\SUP;
+namespace TinyPixel;
 
-use TinyPixel\SUP\Uploads;
+use TinyPixel\Uploads;
 
 /**
  * Local Stream Wrapper
  *
- * @package TinyPixel\SUP
+ * @package TinyPixel\Uploads
  */
 class LocalStreamWrapper
 {

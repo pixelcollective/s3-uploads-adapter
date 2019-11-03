@@ -1,19 +1,19 @@
 <?php
-namespace TinyPixel\SUP;
+namespace TinyPixel\Uploads;
 
 use Aws\S3\S3Client;
-use TinyPixel\SUP\StreamWrapper;
-use TinyPixel\SUP\LocalStreamWrapper;
-use TinyPixel\SUP\ImageEditorImagick;
+use TinyPixel\Uploads\StreamWrapper;
+use TinyPixel\Uploads\LocalStreamWrapper;
+use TinyPixel\Uploads\ImageEditorImagick;
 
 /**
  * S3 Uploads
  *
- * @package TinyPixel\SUP
+ * @package TinyPixel\Uploads
  */
 class Uploads
 {
-    /** @var TinyPixel\SUP\Uploads */
+    /** @var TinyPixel\Uploads\Uploads */
     private static $instance;
 
     /**
@@ -25,7 +25,7 @@ class Uploads
      * @param  string secret
      * @param  string endpoint
      * @param  string signature
-     * @return \TinyPixel\SUP\Uploads
+     * @return \TinyPixel\Uploads\Uploads
      */
     public static function getInstance(
         string $region    = null,
@@ -68,7 +68,7 @@ class Uploads
         string $signature
     ) {
         $this->env    = defined('WP_ENV')                ? WP_ENV                : null;
-        $this->acl = defined('S3_UPLOADS_OBJECT_ACL')    ? S3_UPLOADS_OBJECT_ACL : 'public-read';
+        $this->acl    = defined('S3_UPLOADS_OBJECT_ACL') ? S3_UPLOADS_OBJECT_ACL : 'public-read';
         $this->local  = defined('S3_UPLOADS_USE_LOCAL')  ? S3_UPLOADS_USE_LOCAL  : false;
 
         $this->region    = $region;
@@ -81,7 +81,7 @@ class Uploads
         $this->bucketPath = "s3://{$this->bucket}/{$this->env}/app";
         $this->bucketUrl  = "https://{$this->bucket}.{$this->region}.cdn.digitaloceanspaces.com";
 
-        $this->editor     = '\\TinyPixel\\SUP\\ImageEditorImagick';
+        $this->editor     = '\\TinyPixel\\Uploads\\ImageEditorImagick';
     }
 
     /**
@@ -101,6 +101,7 @@ class Uploads
         add_filter('wp_resource_hints', [$this, 'filterResourceHints'], 10, 2);
         add_action('delete_attachment', [$this, 'deleteAttachment']);
         add_action('wp_handle_sideload_prefilter', [$this, 'sideload']);
+
         remove_filter('admin_notices', 'wpthumb_errors');
     }
 
@@ -111,18 +112,18 @@ class Uploads
      */
     public function filterParameters() : void
     {
-        $this->env        = apply_filters('sup_env',         $this->env);
-        $this->acl        = apply_filters('sup_acl',         $this->acl);
-        $this->local      = apply_filters('sup_local',       $this->local);
-        $this->region     = apply_filters('sup_region',      $this->region);
-        $this->bucket     = apply_filters('sup_bucket',      $this->bucket);
-        $this->key        = apply_filters('sup_key',         $this->key);
-        $this->secret     = apply_filters('sup_secret',      $this->secret);
-        $this->endpoint   = apply_filters('sup_endpoint',    $this->endpoint);
-        $this->signature  = apply_filters('sup_signature',   $this->signature);
-        $this->bucketPath = apply_filters('sup_bucket_path', $this->bucketPath);
-        $this->bucketUrl  = apply_filters('sup_bucket_url',  $this->bucketUrl);
-        $this->editor     = apply_filters('sup_editor',      $this->editor);
+        $this->env        = apply_filters('s3_media_env',         $this->env);
+        $this->acl        = apply_filters('s3_media_acl',         $this->acl);
+        $this->local      = apply_filters('s3_media_local',       $this->local);
+        $this->region     = apply_filters('s3_media_region',      $this->region);
+        $this->bucket     = apply_filters('s3_media_bucket',      $this->bucket);
+        $this->key        = apply_filters('s3_media_key',         $this->key);
+        $this->secret     = apply_filters('s3_media_secret',      $this->secret);
+        $this->endpoint   = apply_filters('s3_media_endpoint',    $this->endpoint);
+        $this->signature  = apply_filters('s3_media_signature',   $this->signature);
+        $this->bucketPath = apply_filters('s3_media_bucket_path', $this->bucketPath);
+        $this->bucketUrl  = apply_filters('s3_media_bucket_url',  $this->bucketUrl);
+        $this->editor     = apply_filters('s3_media_editor',      $this->editor);
     }
 
     /**
@@ -133,7 +134,7 @@ class Uploads
     public function registerStreamWrapper() : void
     {
         if ($this->local) {
-            stream_wrapper_register('s3', '\\TinyPixel\\SUP\\LocalStreamWrapper', STREAM_IS_URL);
+            stream_wrapper_register('s3', '\\TinyPixel\\Uploads\\LocalStreamWrapper', STREAM_IS_URL);
         } else {
             StreamWrapper::register($this->getClient());
 
@@ -216,6 +217,7 @@ class Uploads
         if (!empty($meta['sizes'])) {
             foreach ($meta['sizes'] as $sizeinfo) {
                 $intermediate_file = str_replace(basename($file), $sizeinfo['file'], $file);
+
                 unlink($intermediateFile);
             }
         }
@@ -295,7 +297,7 @@ class Uploads
      */
     public function filterResourceHints(array $hints, string $relation) : array
     {
-        if ('dns-prefetch' === $relation_type) {
+        if ('dns-prefetch' === $relation) {
             $hints[] = $this->bucketUrl;
         }
 
