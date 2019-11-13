@@ -1,5 +1,5 @@
 {
-	"name": "tiny-pixel/tiny-pixel-s3-uploads-adapter",
+	"name": "tiny-pixel/s3-uploads-adapter",
 	"type": "wordpress-plugin",
 	"require": {
 		"composer/installers": "~1.0",
