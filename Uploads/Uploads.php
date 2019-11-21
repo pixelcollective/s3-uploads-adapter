@@ -67,7 +67,7 @@ class Uploads
         string $endpoint,
         string $signature
     ) {
-        $this->env    = getenv('S3_UPLOADS_ENV') ?: getenv('WP_ENV') ?: null;
+        $this->env    = defined('S3_UPLOADS_ENV')        ? S3_UPLOADS_ENV        : WP_ENV ?: null;
         $this->acl    = defined('S3_UPLOADS_OBJECT_ACL') ? S3_UPLOADS_OBJECT_ACL : 'public-read';
         $this->local  = defined('S3_UPLOADS_USE_LOCAL')  ? S3_UPLOADS_USE_LOCAL  : false;
 
