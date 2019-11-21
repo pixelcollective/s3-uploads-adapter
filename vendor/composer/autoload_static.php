@@ -18,7 +18,7 @@ class ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb
     public static $prefixLengthsPsr4 = array (
         'T' => 
         array (
-            'TinyPixel\\SUP\\' => 14,
+            'TinyPixel\\Uploads\\' => 18,
         ),
         'P' => 
         array (
@@ -45,9 +45,9 @@ class ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb
     );
 
     public static $prefixDirsPsr4 = array (
-        'TinyPixel\\SUP\\' => 
+        'TinyPixel\\Uploads\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/SUP',
+            0 => __DIR__ . '/../..' . '/Uploads',
         ),
         'Psr\\Http\\Message\\' => 
         array (

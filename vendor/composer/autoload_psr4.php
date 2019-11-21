@@ -6,7 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'TinyPixel\\SUP\\' => array($baseDir . '/SUP'),
+    'TinyPixel\\Uploads\\' => array($baseDir . '/Uploads'),
     'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
     'JmesPath\\' => array($vendorDir . '/mtdowling/jmespath.php/src'),
     'GuzzleHttp\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
