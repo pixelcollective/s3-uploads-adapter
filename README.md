@@ -2,11 +2,10 @@
 
 ## What
 
-A fork of HumanMade's S3 Uploads plugin with extra filters, less features, and more composer.
+A fork of HM's S3 Uploads plugin.
 
 ## Envvars / Filter Overrides
 
-- `s3_media_env`
 - `s3_media_acl`
 - `s3_media_local`
 - `s3_media_region`
