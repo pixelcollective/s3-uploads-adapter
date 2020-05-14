@@ -11,11 +11,18 @@ use Aws\Command;
 use Aws\Exception\AwsException;
 use Aws\HandlerList;
 use Aws\Middleware;
+use Aws\Retry\QuotaManager;
 use Aws\RetryMiddleware;
 use Aws\ResultInterface;
 use Aws\CommandInterface;
+use Aws\RetryMiddlewareV2;
+use Aws\S3\UseArnRegion\Configuration;
+use Aws\S3\UseArnRegion\ConfigurationInterface;
+use Aws\S3\UseArnRegion\ConfigurationProvider as UseArnRegionConfigurationProvider;
 use Aws\S3\RegionalEndpoint\ConfigurationProvider;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Promise\Promise;
+use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\RequestInterface;
 
 /**
@@ -217,6 +224,19 @@ class S3Client extends AwsClient implements S3ClientInterface
                     . 'result of injecting the bucket into the URL. This '
                     . 'option is useful for interacting with CNAME endpoints.',
             ],
+            'use_arn_region' => [
+                'type'    => 'config',
+                'valid'   => [
+                    'bool',
+                    Configuration::class,
+                    CacheInterface::class,
+                    'callable'
+                ],
+                'doc'     => 'Set to true to allow passed in ARNs to override'
+                    . ' client region. Accepts...',
+                'fn' => [__CLASS__, '_apply_use_arn_region'],
+                'default' => [UseArnRegionConfigurationProvider::class, 'defaultProvider'],
+            ],
             'use_accelerate_endpoint' => [
                 'type' => 'config',
                 'valid' => ['bool'],
@@ -276,6 +296,14 @@ class S3Client extends AwsClient implements S3ClientInterface
      *   individual operations by setting '@use_accelerate_endpoint' to true or
      *   false. Note: you must enable S3 Accelerate on a bucket before it can be
      *   accessed via an Accelerate endpoint.
+     * - use_arn_region: (Aws\S3\UseArnRegion\ConfigurationInterface,
+     *   Aws\CacheInterface, bool, callable) Set to true to enable the client
+     *   to use the region from a supplied ARN argument instead of the client's
+     *   region. Provide an instance of Aws\S3\UseArnRegion\ConfigurationInterface,
+     *   an instance of Aws\CacheInterface, a callable that provides a promise for
+     *   a Configuration object, or a boolean value. Defaults to false (i.e.
+     *   the SDK will not follow the ARN region if it conflicts with the client
+     *   region and instead throw an error).
      * - use_dual_stack_endpoint: (bool) Set to true to send requests to an S3
      *   Dual Stack endpoint by default, which enables IPv6 Protocol.
      *   Can be enabled or disabled on individual operations by setting
@@ -305,7 +333,6 @@ class S3Client extends AwsClient implements S3ClientInterface
             's3.content_type'
         );
 
-
         // Use the bucket style middleware when using a "bucket_endpoint" (for cnames)
         if ($this->getConfig('bucket_endpoint')) {
             $stack->appendBuild(BucketEndpointMiddleware::wrap(), 's3.bucket_endpoint');
@@ -323,6 +350,22 @@ class S3Client extends AwsClient implements S3ClientInterface
             );
         }
 
+        $stack->appendBuild(
+            BucketEndpointArnMiddleware::wrap(
+                $this->getApi(),
+                $this->getRegion(),
+                [
+                    'use_arn_region' => $this->getConfig('use_arn_region'),
+                    'dual_stack' => $this->getConfig('use_dual_stack_endpoint'),
+                    'accelerate' => $this->getConfig('use_accelerate_endpoint'),
+                    'path_style' => $this->getConfig('use_path_style_endpoint'),
+                    'endpoint' => isset($args['endpoint'])
+                        ? $args['endpoint']
+                        : null
+                ]
+            ),
+            's3.bucket_endpoint_arn'
+        );
         $stack->appendSign(PutObjectUrlMiddleware::wrap(), 's3.put_object_url');
         $stack->appendSign(PermanentRedirectMiddleware::wrap(), 's3.permanent_redirect');
         $stack->appendInit(Middleware::sourceFile($this->getApi()), 's3.source_file');
@@ -351,6 +394,25 @@ class S3Client extends AwsClient implements S3ClientInterface
             // Cannot look like an IP address
             !filter_var($bucket, FILTER_VALIDATE_IP) &&
             preg_match('/^[a-z0-9]([a-z0-9\-\.]*[a-z0-9])?$/', $bucket);
+    }
+
+    public static function _apply_use_arn_region($value, array &$args, HandlerList $list)
+    {
+        if ($value instanceof CacheInterface) {
+            $value = UseArnRegionConfigurationProvider::defaultProvider($args);
+        }
+        if (is_callable($value)) {
+            $value = $value();
+        }
+        if ($value instanceof PromiseInterface) {
+            $value = $value->wait();
+        }
+        if ($value instanceof ConfigurationInterface) {
+            $args['use_arn_region'] = $value;
+        } else {
+            // The Configuration class itself will validate other inputs
+            $args['use_arn_region'] = new Configuration($value);
+        }
     }
 
     public function createPresignedRequest(CommandInterface $command, $expires, array $options = [])
@@ -536,47 +598,91 @@ class S3Client extends AwsClient implements S3ClientInterface
     }
 
     /** @internal */
-    public static function _applyRetryConfig($value, $_, HandlerList $list)
+    public static function _applyRetryConfig($value, $args, HandlerList $list)
     {
-        if (!$value) {
-            return;
+        if ($value) {
+            $config = \Aws\Retry\ConfigurationProvider::unwrap($value);
+
+            if ($config->getMode() === 'legacy') {
+                $maxRetries = $config->getMaxAttempts() - 1;
+                $decider = RetryMiddleware::createDefaultDecider($maxRetries);
+                $decider = function ($retries, $command, $request, $result, $error) use ($decider, $maxRetries) {
+                    $maxRetries = null !== $command['@retries']
+                        ? $command['@retries']
+                        : $maxRetries;
+
+                    if ($decider($retries, $command, $request, $result, $error)) {
+                        return true;
+                    }
+
+                    if ($error instanceof AwsException
+                        && $retries < $maxRetries
+                    ) {
+                        if ($error->getResponse()
+                            && $error->getResponse()->getStatusCode() >= 400
+                        ) {
+                            return strpos(
+                                    $error->getResponse()->getBody(),
+                                    'Your socket connection to the server'
+                                ) !== false;
+                        }
+
+                        if ($error->getPrevious() instanceof RequestException) {
+                            // All commands except CompleteMultipartUpload are
+                            // idempotent and may be retried without worry if a
+                            // networking error has occurred.
+                            return $command->getName() !== 'CompleteMultipartUpload';
+                        }
+                    }
+
+                    return false;
+                };
+
+                $delay = [RetryMiddleware::class, 'exponentialDelay'];
+                $list->appendSign(Middleware::retry($decider, $delay), 'retry');
+            } else {
+                $defaultDecider = RetryMiddlewareV2::createDefaultDecider(
+                    new QuotaManager(),
+                    $config->getMaxAttempts()
+                );
+
+                $list->appendSign(
+                    RetryMiddlewareV2::wrap(
+                        $config,
+                        [
+                            'collect_stats' => $args['stats']['retries'],
+                            'decider' => function(
+                                $attempts,
+                                CommandInterface $cmd,
+                                $result
+                            ) use ($defaultDecider, $config) {
+                                $isRetryable = $defaultDecider($attempts, $cmd, $result);
+                                if (!$isRetryable
+                                    && $result instanceof AwsException
+                                    && $attempts < $config->getMaxAttempts()
+                                ) {
+                                    if (!empty($result->getResponse())
+                                        && strpos(
+                                            $result->getResponse()->getBody(),
+                                            'Your socket connection to the server'
+                                        ) !== false
+                                    ) {
+                                        $isRetryable = false;
+                                    }
+                                    if ($result->getPrevious() instanceof RequestException
+                                        && $cmd->getName() !== 'CompleteMultipartUpload'
+                                    ) {
+                                        $isRetryable = true;
+                                    }
+                                }
+                                return $isRetryable;
+                            }
+                        ]
+                    ),
+                    'retry'
+                );
+            }
         }
-
-        $decider = RetryMiddleware::createDefaultDecider($value);
-        $decider = function ($retries, $command, $request, $result, $error) use ($decider, $value) {
-            $maxRetries = null !== $command['@retries']
-                ? $command['@retries']
-                : $value;
-
-            if ($decider($retries, $command, $request, $result, $error)) {
-                return true;
-            }
-
-            if ($error instanceof AwsException
-                && $retries < $maxRetries
-            ) {
-                if ($error->getResponse()
-                    && $error->getResponse()->getStatusCode() >= 400
-                ) {
-                    return strpos(
-                            $error->getResponse()->getBody(),
-                            'Your socket connection to the server'
-                        ) !== false;
-                }
-
-                if ($error->getPrevious() instanceof RequestException) {
-                    // All commands except CompleteMultipartUpload are
-                    // idempotent and may be retried without worry if a
-                    // networking error has occurred.
-                    return $command->getName() !== 'CompleteMultipartUpload';
-                }
-            }
-
-            return false;
-        };
-
-        $delay = [RetryMiddleware::class, 'exponentialDelay'];
-        $list->appendSign(Middleware::retry($decider, $delay), 'retry');
     }
 
     /** @internal */
@@ -659,5 +765,61 @@ class S3Client extends AwsClient implements S3ClientInterface
             new Service($api, ApiProvider::defaultProvider()),
             new DocModel($docs)
         ];
+    }
+
+    /**
+     * @internal
+     * @codeCoverageIgnore
+     */
+    public static function addDocExamples($examples)
+    {
+        $getObjectExample = [
+            'input' => [
+                'Bucket' => 'arn:aws:s3:us-east-1:123456789012:accesspoint:myaccesspoint',
+                'Key' => 'my-key'
+            ],
+            'output' => [
+                'Body' => 'class GuzzleHttp\Psr7\Stream#208 (7) {...}',
+                'ContentLength' => '11',
+                'ContentType' => 'application/octet-stream',
+            ],
+            'comments' => [
+                'input' => '',
+                'output' => 'Simplified example output'
+            ],
+            'description' => 'The following example retrieves an object by referencing the bucket via an S3 accesss point ARN. Result output is simplified for the example.',
+            'id' => '',
+            'title' => 'To get an object via an S3 access point ARN'
+        ];
+        if (isset($examples['GetObject'])) {
+            $examples['GetObject'] []= $getObjectExample;
+        } else {
+            $examples['GetObject'] = [$getObjectExample];
+        }
+
+        $putObjectExample = [
+            'input' => [
+                'Bucket' => 'arn:aws:s3:us-east-1:123456789012:accesspoint:myaccesspoint',
+                'Key' => 'my-key',
+                'Body' => 'my-body',
+            ],
+            'output' => [
+                'ObjectURL' => 'https://my-bucket.s3.us-east-1.amazonaws.com/my-key'
+            ],
+            'comments' => [
+                'input' => '',
+                'output' => 'Simplified example output'
+            ],
+            'description' => 'The following example uploads an object by referencing the bucket via an S3 accesss point ARN. Result output is simplified for the example.',
+            'id' => '',
+            'title' => 'To upload an object via an S3 access point ARN'
+        ];
+        if (isset($examples['PutObject'])) {
+            $examples['PutObject'] []= $putObjectExample;
+        } else {
+            $examples['PutObject'] = [$putObjectExample];
+        }
+
+        return $examples;
     }
 }

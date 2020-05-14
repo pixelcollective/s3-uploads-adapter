@@ -2,13 +2,12 @@
 	"name": "tiny-pixel/s3-uploads-adapter",
 	"type": "wordpress-plugin",
 	"require": {
-		"composer/installers": "~1.0",
-		"aws/aws-sdk-php": "~3.18",
-		"james-heinrich/getid3": "^1.9"
+		"league/flysystem-aws-s3-v3": "^1.0",
+		"composer/installers": "^1.9"
    },
    "autoload": {
      "psr-4": {
-       "TinyPixel\\Uploads\\": "Uploads/"
+       "TinyPixel\\Uploads\\": "src/"
      }
    }
 }
