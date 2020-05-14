@@ -42,8 +42,8 @@ class Uploads
         $this->secret = defined('S3_UPLOADS_SECRET') ? S3_UPLOADS_SECRET : null;
         $this->endpoint = defined('S3_UPLOADS_ENDPOINT') ? S3_UPLOADS_ENDPOINT : null;
         $this->signature = defined('S3_UPLOADS_SIGNATURE') ? S3_UPLOADS_SIGNATURE : 'v4';
-        $this->bucketPath = defined('S3_UPLOADS_BUCKETPATH') ? S3_UPLOADS_BUCKETPATH : "s3://{$this->bucket}/app";
-        $this->bucketUrl = defined('S3_UPLOADS_BUCKETURL') ? S3_UPLOADS_BUCKETURL : "https://{$this->bucket}.{$this->region}.digitaloceanspaces.com";
+        $this->bucketPath = "s3://{$this->bucket}/app";
+        $this->bucketUrl = "https://{$this->bucket}.{$this->region}.cdn.digitaloceanspaces.com";
         $this->editor = '\\TinyPixel\\Uploads\\ImageEditorImagick';
     }
 
