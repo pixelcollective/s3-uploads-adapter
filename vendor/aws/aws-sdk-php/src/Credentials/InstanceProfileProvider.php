@@ -11,7 +11,7 @@ use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * Credential provider that provides credentials from the EC2 metadata server.
+ * Credential provider that provides credentials from the EC2 metadata service.
  */
 class InstanceProfileProvider
 {
@@ -20,6 +20,8 @@ class InstanceProfileProvider
     const TOKEN_PATH = 'api/token';
 
     const ENV_DISABLE = 'AWS_EC2_METADATA_DISABLED';
+    const ENV_TIMEOUT = 'AWS_METADATA_SERVICE_TIMEOUT';
+    const ENV_RETRIES = 'AWS_METADATA_SERVICE_NUM_ATTEMPTS';
 
     /** @var string */
     private $profile;
@@ -50,9 +52,9 @@ class InstanceProfileProvider
      */
     public function __construct(array $config = [])
     {
-        $this->timeout = isset($config['timeout']) ? $config['timeout'] : 1.0;
+        $this->timeout = (float) getenv(self::ENV_TIMEOUT) ?: (isset($config['timeout']) ? $config['timeout'] : 1.0);
         $this->profile = isset($config['profile']) ? $config['profile'] : null;
-        $this->retries = isset($config['retries']) ? $config['retries'] : 3;
+        $this->retries = (int) getenv(self::ENV_RETRIES) ?: (isset($config['retries']) ? $config['retries'] : 3);
         $this->attempts = 0;
         $this->client = isset($config['client'])
             ? $config['client'] // internal use only
@@ -189,7 +191,7 @@ class InstanceProfileProvider
         $disabled = getenv(self::ENV_DISABLE) ?: false;
         if (strcasecmp($disabled, 'true') === 0) {
             throw new CredentialsException(
-                $this->createErrorMessage('EC2 metadata server access disabled')
+                $this->createErrorMessage('EC2 metadata service access disabled')
             );
         }
 
@@ -252,7 +254,7 @@ class InstanceProfileProvider
     private function createErrorMessage($previous)
     {
         return "Error retrieving credentials from the instance profile "
-            . "metadata server. ({$previous})";
+            . "metadata service. ({$previous})";
     }
 
     private function decodeResult($response)
