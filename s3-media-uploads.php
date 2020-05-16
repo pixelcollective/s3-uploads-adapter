@@ -20,5 +20,5 @@ if (defined('WP_CLI') && WP_CLI) {
 }
 
 add_action('plugins_loaded', function () use ($plugin) {
-    $plugin->get('uploads')->setup();
+    $plugin->get('uploads')->init();
 });

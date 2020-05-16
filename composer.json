@@ -2,8 +2,8 @@
 	"name": "tiny-pixel/s3-uploads-adapter",
 	"type": "wordpress-plugin",
 	"require": {
-		"league/flysystem-aws-s3-v3": "^1.0",
 		"composer/installers": "^1.9",
+		"league/flysystem-aws-s3-v3": "^1.0",
 		"php-di/php-di": "^6.1",
 		"tightenco/collect": "^7.11"
    },
