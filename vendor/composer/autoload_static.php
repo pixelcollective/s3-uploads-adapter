@@ -7,32 +7,67 @@ namespace Composer\Autoload;
 class ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb
 {
     public static $files = array (
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
+        '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
+        'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         'b067bc7112e384b61c701452d53a14a8' => __DIR__ . '/..' . '/mtdowling/jmespath.php/src/JmesPath.php',
+        'bd9634f2d41831496de0d3dfe4c94881' => __DIR__ . '/..' . '/symfony/polyfill-php56/bootstrap.php',
         '8a9dc1de0ca7e01f3e08231539562f61' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/functions.php',
+        '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
+        'b33e3d135e5d9e47d845c576147bda89' => __DIR__ . '/..' . '/php-di/php-di/src/functions.php',
+        'fe62ba7e10580d903cc46d808b5961a4' => __DIR__ . '/..' . '/tightenco/collect/src/Collect/Support/helpers.php',
+        'caf31cc6ec7cf2241cb6f12c226c3846' => __DIR__ . '/..' . '/tightenco/collect/src/Collect/Support/alias.php',
     );
 
     public static $prefixLengthsPsr4 = array (
         'T' => 
         array (
             'TinyPixel\\Uploads\\' => 18,
+            'Tightenco\\Collect\\' => 18,
+        ),
+        'S' => 
+        array (
+            'Symfony\\Polyfill\\Util\\' => 22,
+            'Symfony\\Polyfill\\Php72\\' => 23,
+            'Symfony\\Polyfill\\Php56\\' => 23,
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
+            'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
+            'Symfony\\Component\\VarDumper\\' => 28,
+            'SuperClosure\\' => 13,
         ),
         'P' => 
         array (
             'Psr\\Http\\Message\\' => 17,
+            'Psr\\Container\\' => 14,
+            'PhpParser\\' => 10,
+            'PhpDocReader\\' => 13,
+        ),
+        'L' => 
+        array (
+            'League\\Flysystem\\AwsS3v3\\' => 25,
+            'League\\Flysystem\\' => 17,
         ),
         'J' => 
         array (
             'JmesPath\\' => 9,
+        ),
+        'I' => 
+        array (
+            'Invoker\\' => 8,
         ),
         'G' => 
         array (
             'GuzzleHttp\\Psr7\\' => 16,
             'GuzzleHttp\\Promise\\' => 19,
             'GuzzleHttp\\' => 11,
+        ),
+        'D' => 
+        array (
+            'DI\\' => 3,
         ),
         'C' => 
         array (
@@ -47,15 +82,71 @@ class ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb
     public static $prefixDirsPsr4 = array (
         'TinyPixel\\Uploads\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/Uploads',
+            0 => __DIR__ . '/../..' . '/src',
+        ),
+        'Tightenco\\Collect\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/tightenco/collect/src/Collect',
+        ),
+        'Symfony\\Polyfill\\Util\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-util',
+        ),
+        'Symfony\\Polyfill\\Php72\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php72',
+        ),
+        'Symfony\\Polyfill\\Php56\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php56',
+        ),
+        'Symfony\\Polyfill\\Mbstring\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+        ),
+        'Symfony\\Polyfill\\Intl\\Idn\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-intl-idn',
+        ),
+        'Symfony\\Component\\VarDumper\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/var-dumper',
+        ),
+        'SuperClosure\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/jeremeamia/superclosure/src',
         ),
         'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
+        'Psr\\Container\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/container/src',
+        ),
+        'PhpParser\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
+        ),
+        'PhpDocReader\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-di/phpdoc-reader/src/PhpDocReader',
+        ),
+        'League\\Flysystem\\AwsS3v3\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/league/flysystem-aws-s3-v3/src',
+        ),
+        'League\\Flysystem\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/league/flysystem/src',
+        ),
         'JmesPath\\' => 
         array (
             0 => __DIR__ . '/..' . '/mtdowling/jmespath.php/src',
+        ),
+        'Invoker\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-di/invoker/src',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (
@@ -69,6 +160,10 @@ class ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
+        'DI\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-di/php-di/src',
+        ),
         'Composer\\Installers\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
@@ -79,96 +174,11 @@ class ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb
         ),
     );
 
-    public static $classMap = array (
-        'AMFReader' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.flv.php',
-        'AMFStream' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.flv.php',
-        'AVCSequenceParameterSetReader' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.flv.php',
-        'Image_XMP' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.tag.xmp.php',
-        'getID3' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/getid3.php',
-        'getID3_cached_dbm' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/extension.cache.dbm.php',
-        'getID3_cached_mysql' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/extension.cache.mysql.php',
-        'getID3_cached_mysqli' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/extension.cache.mysqli.php',
-        'getID3_cached_sqlite3' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/extension.cache.sqlite3.php',
-        'getid3_aa' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.aa.php',
-        'getid3_aac' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.aac.php',
-        'getid3_ac3' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.ac3.php',
-        'getid3_amr' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.amr.php',
-        'getid3_apetag' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.tag.apetag.php',
-        'getid3_asf' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.asf.php',
-        'getid3_au' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.au.php',
-        'getid3_avr' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.avr.php',
-        'getid3_bink' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.bink.php',
-        'getid3_bmp' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.graphic.bmp.php',
-        'getid3_bonk' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.bonk.php',
-        'getid3_cue' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.misc.cue.php',
-        'getid3_dsf' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.dsf.php',
-        'getid3_dss' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.dss.php',
-        'getid3_dts' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.dts.php',
-        'getid3_efax' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.graphic.efax.php',
-        'getid3_exception' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/getid3.php',
-        'getid3_exe' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.misc.exe.php',
-        'getid3_flac' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.flac.php',
-        'getid3_flv' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.flv.php',
-        'getid3_gif' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.graphic.gif.php',
-        'getid3_gzip' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.archive.gzip.php',
-        'getid3_handler' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/getid3.php',
-        'getid3_id3v1' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.tag.id3v1.php',
-        'getid3_id3v2' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.tag.id3v2.php',
-        'getid3_iso' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.misc.iso.php',
-        'getid3_jpg' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.graphic.jpg.php',
-        'getid3_la' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.la.php',
-        'getid3_lib' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/getid3.lib.php',
-        'getid3_lpac' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.lpac.php',
-        'getid3_lyrics3' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.tag.lyrics3.php',
-        'getid3_matroska' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.matroska.php',
-        'getid3_midi' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.midi.php',
-        'getid3_mod' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.mod.php',
-        'getid3_monkey' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.monkey.php',
-        'getid3_mp3' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.mp3.php',
-        'getid3_mpc' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.mpc.php',
-        'getid3_mpeg' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.mpeg.php',
-        'getid3_msoffice' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.misc.msoffice.php',
-        'getid3_nsv' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.nsv.php',
-        'getid3_ogg' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.ogg.php',
-        'getid3_optimfrog' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.optimfrog.php',
-        'getid3_par2' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.misc.par2.php',
-        'getid3_pcd' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.graphic.pcd.php',
-        'getid3_pdf' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.misc.pdf.php',
-        'getid3_png' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.graphic.png.php',
-        'getid3_quicktime' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.quicktime.php',
-        'getid3_rar' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.archive.rar.php',
-        'getid3_real' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.real.php',
-        'getid3_riff' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.riff.php',
-        'getid3_rkau' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.rkau.php',
-        'getid3_shorten' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.shorten.php',
-        'getid3_svg' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.graphic.svg.php',
-        'getid3_swf' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.swf.php',
-        'getid3_szip' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.archive.szip.php',
-        'getid3_tar' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.archive.tar.php',
-        'getid3_tiff' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.graphic.tiff.php',
-        'getid3_ts' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.ts.php',
-        'getid3_tta' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.tta.php',
-        'getid3_voc' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.voc.php',
-        'getid3_vqf' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.vqf.php',
-        'getid3_wavpack' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.wavpack.php',
-        'getid3_write_apetag' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/write.apetag.php',
-        'getid3_write_id3v1' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/write.id3v1.php',
-        'getid3_write_id3v2' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/write.id3v2.php',
-        'getid3_write_lyrics3' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/write.lyrics3.php',
-        'getid3_write_metaflac' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/write.metaflac.php',
-        'getid3_write_real' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/write.real.php',
-        'getid3_write_vorbiscomment' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/write.vorbiscomment.php',
-        'getid3_writetags' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/write.php',
-        'getid3_xz' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.archive.xz.php',
-        'getid3_zip' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.archive.zip.php',
-    );
-
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb::$classMap;
 
         }, null, ClassLoader::class);
     }
