@@ -154,8 +154,9 @@ class Runtime
             basename($file->tmp_name),
         ]);
 
-        $this->filesystem->copy($file->tmp_name, $writePath);
-        $this->filesystem->delete($file->tmp_name);
+        $this->storage->copy($file->tmp_name, $writePath);
+        $this->storage->delete($file->tmp_name);
+
         $file->tmp_name = $writePath;
 
         return (array) $file;
@@ -175,7 +176,7 @@ class Runtime
         if ($tmp = $this->copyImageFromS3($file)) {
             $meta = wp_read_image_metadata($tmp);
             add_filter('wp_read_image_metadata', [$this, 'filterMetadata'], 10, 2);
-            $this->filesystem->delete($tmp);
+            $this->storage->delete($tmp);
         }
 
         return $meta;
@@ -190,9 +191,8 @@ class Runtime
      */
     public function wpResourceHints(array $hints = [], string $relation = ''): array
     {
-        $relation === 'dns-prefetch' && array_push($hints, ...[
-            $this->plugin->get('storage.s3.config')->bucketUrl
-        ]);
+        $relation === 'dns-prefetch'
+            && array_push($hints, ...[$this->plugin->get('storage.s3.config')->bucketUrl]);
 
         return $hints;
     }
@@ -207,7 +207,7 @@ class Runtime
     {
         $this->plugin->make('wp.includes.file');
 
-        $this->filesystem->copy($file, wp_tempnam($file));
+        $this->storage->copy($file, wp_tempnam($file));
 
         return wp_tempnam($file);
     }

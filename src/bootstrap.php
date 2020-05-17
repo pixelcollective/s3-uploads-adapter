@@ -24,6 +24,7 @@ use League\Flysystem\MountManager;
 use League\Flysystem\Filesystem;
 use TinyPixel\Storage\Plugin;
 use TinyPixel\Storage\CLI;
+use TinyPixel\Storage\ImageEditor;
 
 /**
  * Build the plugin container.
@@ -42,7 +43,7 @@ $builder->addDefinitions([
         return new Plugin\Runtime($plugin);
     },
     'plugin.editor' => function (ContainerInterface $plugin) {
-        return new Plugin\ImageEditor\Editor($plugin);
+        return new ImageEditor\Editor($plugin);
     },
 
     /**
@@ -87,7 +88,7 @@ $builder->addDefinitions([
         );
     },
     'storage.s3.client' => function (ContainerInterface $plugin) {
-        return S3Client::factory([
+        return new S3Client([
             'version' => 'latest',
             'credentials' => [
                 'key' => $plugin->get('storage.s3.config')->key,
@@ -95,11 +96,9 @@ $builder->addDefinitions([
             ],
             'region' => $plugin->get('storage.s3.config')->region,
             'endpoint' => $plugin->get('storage.s3.config')->endpoint,
-            'csm' => $plugin->get('storage.s3.config')->csm,
         ]);
     },
     'storage.s3.config' => (object) [
-        'csm' => defined('S3_CSM') ? S3_CSM : false,
         'region' => defined('S3_REGION') ? S3_REGION : null,
         'bucket' => defined('S3_BUCKET') ? S3_BUCKET : null,
         'key' => defined('S3_KEY') ? S3_KEY : null,
@@ -107,10 +106,7 @@ $builder->addDefinitions([
         'endpoint' => defined('S3_ENDPOINT') ? S3_ENDPOINT : 'https://nyc3.digitaloceanspaces.com',
         'signature' => defined('S3_SIGNATURE') ? S3_SIGNATURE : 'v4',
         'bucketPath' => defined('S3_BUCKET_PATH') ? S3_BUCKET_PATH : "s3://" . S3_BUCKET . "/app",
-        'bucketUrl' => defined('S3_BUCKET_URL')
-            ? S3_BUCKET_URL
-            : 'https://' . join('.', [S3_BUCKET, S3_REGION, 'cdn.digitaloceanspaces.com']
-        ),
+        'bucketUrl' => defined('S3_BUCKET_URL') ? S3_BUCKET_URL : 'https://' . join('.', [S3_BUCKET, S3_REGION, 'cdn.digitaloceanspaces.com']),
     ],
 
     /**
