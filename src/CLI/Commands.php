@@ -1,5 +1,5 @@
 <?php
-namespace TinyPixel\Storage;
+namespace TinyPixel\Storage\CLI;
 
 use \WP_CLI;
 use Psr\Container\ContainerInterface;
@@ -9,6 +9,10 @@ use Psr\Container\ContainerInterface;
  */
 class Commands extends \WP_CLI_Command
 {
+    public static $plugin;
+
+    public static $storage;
+
     /**
      * Class constructor.
      */
@@ -26,7 +30,7 @@ class Commands extends \WP_CLI_Command
     public function ls() : void
     {
         try {
-            self::$plugin->get('collection')::make(
+            self::$plugin->get('illuminate.support.collection')::make(
                 self::$storage->listContents('s3://')
             )->each(function ($item) {
                 WP_CLI::line("{$item['path']} ({$item['type']})");
