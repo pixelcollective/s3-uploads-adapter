@@ -13,13 +13,13 @@ class ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
-        'bd9634f2d41831496de0d3dfe4c94881' => __DIR__ . '/..' . '/symfony/polyfill-php56/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         'b067bc7112e384b61c701452d53a14a8' => __DIR__ . '/..' . '/mtdowling/jmespath.php/src/JmesPath.php',
+        'bd9634f2d41831496de0d3dfe4c94881' => __DIR__ . '/..' . '/symfony/polyfill-php56/bootstrap.php',
         '8a9dc1de0ca7e01f3e08231539562f61' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/functions.php',
-        'b33e3d135e5d9e47d845c576147bda89' => __DIR__ . '/..' . '/php-di/php-di/src/functions.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         '72579e7bd17821bb1321b87411366eae' => __DIR__ . '/..' . '/illuminate/support/helpers.php',
+        'b33e3d135e5d9e47d845c576147bda89' => __DIR__ . '/..' . '/php-di/php-di/src/functions.php',
         '7018e3dbeb54682c59da60bb2ff4f971' => __DIR__ . '/..' . '/roots/support/helpers.php',
         'fe62ba7e10580d903cc46d808b5961a4' => __DIR__ . '/..' . '/tightenco/collect/src/Collect/Support/helpers.php',
         'caf31cc6ec7cf2241cb6f12c226c3846' => __DIR__ . '/..' . '/tightenco/collect/src/Collect/Support/alias.php',
@@ -224,62 +224,11 @@ class ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb
         ),
     );
 
-    public static $classMap = array (
-        'Eightshift_Libs\\Blocks\\Blocks' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/blocks/class-blocks.php',
-        'Eightshift_Libs\\Blocks\\Renderable_Block' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/blocks/interface-renderable-block.php',
-        'Eightshift_Libs\\Columns\\Base_Post_Type_Columns' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/columns/class-base-post-type-columns.php',
-        'Eightshift_Libs\\Columns\\Base_Taxonomy_Columns' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/columns/class-base-taxonomy-columns.php',
-        'Eightshift_Libs\\Columns\\Base_User_Columns' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/columns/class-base-user-columns.php',
-        'Eightshift_Libs\\Core\\Config' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/class-config.php',
-        'Eightshift_Libs\\Core\\Config_Data' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/interface-config-data.php',
-        'Eightshift_Libs\\Core\\Has_Activation' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/has-activation-interface.php',
-        'Eightshift_Libs\\Core\\Has_Deactivation' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/has-deactivation-interface.php',
-        'Eightshift_Libs\\Core\\Main' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/class-main.php',
-        'Eightshift_Libs\\Core\\Registrable' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/interface-registrable.php',
-        'Eightshift_Libs\\Core\\Renderable' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/interface-renderable.php',
-        'Eightshift_Libs\\Core\\Service' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/interface-service.php',
-        'Eightshift_Libs\\Custom_Post_Type\\Base_Post_Type' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/custom-post-type/class-base-post-type.php',
-        'Eightshift_Libs\\Custom_Post_Type\\Label_Generator' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/custom-post-type/class-label-generator.php',
-        'Eightshift_Libs\\Custom_Taxonomy\\Base_Taxonomy' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/custom-taxonomy/class-base-taxonomy.php',
-        'Eightshift_Libs\\Enqueue\\Assets' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/enqueue/class-assets.php',
-        'Eightshift_Libs\\Enqueue\\Enqueue_Admin' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/enqueue/class-enqueue-admin.php',
-        'Eightshift_Libs\\Enqueue\\Enqueue_Blocks' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/enqueue/class-enqueue-blocks.php',
-        'Eightshift_Libs\\Enqueue\\Enqueue_Theme' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/enqueue/class-enqueue-theme.php',
-        'Eightshift_Libs\\Exception\\Component_Exception' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/exception/class-component-exception.php',
-        'Eightshift_Libs\\Exception\\Failed_To_Load_View' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/exception/class-failed-to-load-view.php',
-        'Eightshift_Libs\\Exception\\General_Exception' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/exception/general-exception-interface.php',
-        'Eightshift_Libs\\Exception\\Invalid_Block' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/exception/class-invalid-block.php',
-        'Eightshift_Libs\\Exception\\Invalid_Callback' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/exception/class-invalid-callback.php',
-        'Eightshift_Libs\\Exception\\Invalid_Manifest' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/exception/class-invalid-manifest.php',
-        'Eightshift_Libs\\Exception\\Invalid_Nouns' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/exception/class-invalid-nouns.php',
-        'Eightshift_Libs\\Exception\\Invalid_Service' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/exception/class-invalid-service.php',
-        'Eightshift_Libs\\Exception\\Plugin_Activation_Failure' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/exception/class-plugin-activation-failure.php',
-        'Eightshift_Libs\\Helpers\\Components' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/helpers/class-components.php',
-        'Eightshift_Libs\\Helpers\\Error_Logger' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/helpers/trait-error-logger.php',
-        'Eightshift_Libs\\Helpers\\Object_Helper' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/helpers/class-object-helper.php',
-        'Eightshift_Libs\\Helpers\\Shortcode' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/helpers/class-shortcode.php',
-        'Eightshift_Libs\\I18n\\I18n' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/i18n/class-i18n.php',
-        'Eightshift_Libs\\Login\\Login' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/login/class-login.php',
-        'Eightshift_Libs\\Manifest\\Manifest' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/manifest/class-manifest.php',
-        'Eightshift_Libs\\Manifest\\Manifest_Data' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/manifest/interface-manifest-data.php',
-        'Eightshift_Libs\\Media\\Media' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/media/class-media.php',
-        'Eightshift_Libs\\Menu\\Bem_Menu_Walker' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/menu/class-bem-menu-walker.php',
-        'Eightshift_Libs\\Menu\\Menu' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/menu/class-menu.php',
-        'Eightshift_Libs\\Menu\\Menu_Positions' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/menu/interface-attributes-data.php',
-        'Eightshift_Libs\\Rest\\Base_Field' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/rest/class-base-field.php',
-        'Eightshift_Libs\\Rest\\Base_Route' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/rest/class-base-route.php',
-        'Eightshift_Libs\\Rest\\Callable_Field' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/rest/interface-callable-field.php',
-        'Eightshift_Libs\\Rest\\Callable_Route' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/rest/interface-callable-route.php',
-        'Eightshift_Libs\\Rest\\Route' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/rest/interface-route.php',
-        'Eightshift_Libs\\Rest\\Route_Security' => __DIR__ . '/..' . '/infinum/eightshift-libs/src/rest/interface-route-security.php',
-    );
-
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -599,61 +599,6 @@
         "homepage": "https://laravel.com"
     },
     {
-        "name": "infinum/eightshift-libs",
-        "version": "2.2.2",
-        "version_normalized": "2.2.2.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/infinum/eightshift-libs.git",
-            "reference": "68a5016cd76b4677d3a374affff5cee802c17e30"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/infinum/eightshift-libs/zipball/68a5016cd76b4677d3a374affff5cee802c17e30",
-            "reference": "68a5016cd76b4677d3a374affff5cee802c17e30",
-            "shasum": ""
-        },
-        "require": {
-            "ext-json": "*",
-            "php": ">=7.1",
-            "php-di/php-di": "^6.0"
-        },
-        "require-dev": {
-            "dealerdirect/phpcodesniffer-composer-installer": "^0.5",
-            "infinum/coding-standards-wp": "^0.4.1"
-        },
-        "time": "2020-05-15T07:42:34+00:00",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "classmap": [
-                "src/"
-            ]
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "Eightshift team",
-                "email": "team@eightshift.com",
-                "homepage": "https://eightshift.com/",
-                "role": "Developer / IT Manager"
-            }
-        ],
-        "description": "WordPress libs developed by Eightshift team to use in modern WordPress.",
-        "homepage": "https://eightshift.com/",
-        "keywords": [
-            "blocks",
-            "composer",
-            "gutenberg",
-            "installer",
-            "plugin",
-            "wordpress"
-        ]
-    },
-    {
         "name": "jeremeamia/superclosure",
         "version": "2.4.0",
         "version_normalized": "2.4.0.0",
