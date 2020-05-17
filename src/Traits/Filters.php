@@ -2,16 +2,16 @@
 
 namespace TinyPixel\Storage\Traits;
 
-use Psr\Container\ContainerInterface;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
+use Psr\Container\ContainerInterface;
 
 /**
  * Filters
  */
 trait Filters
 {
-    /** @var array */
+    /** @var */
     public $args = [];
 
     /**
@@ -34,11 +34,9 @@ trait Filters
      */
     protected function getArgs(string $key): array
     {
-        $this->args = array_merge($this->args, $this->setArgs());
+        $this->args = Collection::make($this->args)->mergeRecursive($this->setArgs());
 
-        return array_key_exists($key, $this->args)
-            ? $this->args[$key]
-            : [];
+        return $this->args->has($key) ? $this->args->get($key) : [];
     }
 
     /**

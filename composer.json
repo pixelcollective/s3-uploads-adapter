@@ -1,5 +1,5 @@
 {
-	"name": "tiny-pixel/s3-uploads-adapter",
+	"name": "tiny-pixel/storage",
 	"type": "wordpress-plugin",
 	"require": {
 		"composer/installers": "^1.9",
@@ -7,12 +7,13 @@
 		"php-di/php-di": "^6.1",
 		"tightenco/collect": "^7.11",
 		"johnbillion/wp-hooks": "^0.4.2",
-		"roots/support": "^1.0",
 		"illuminate/support": "^7.11"
    },
    "autoload": {
      "psr-4": {
-       "TinyPixel\\Storage\\": "src/"
+			 "TinyPixel\\Storage\\": "src/"
      }
-   }
+	 },
+	 "minimum-stability": "dev",
+	 "prefer-stable": true
 }

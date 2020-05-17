@@ -1,9 +1,8 @@
 <?php
 
-namespace TinyPixel\Storage;
+namespace TinyPixel\Storage\Plugin;
 
 use Psr\Container\ContainerInterface;
-use Illuminate\Support\Collection;
 use TinyPixel\Storage\Traits\Filters;
 
 /**
@@ -21,12 +20,9 @@ class Runtime
      *
      * @param Psr\Container\ContainerInterface $plugin
      */
-    public function __construct(
-        ContainerInterface $plugin,
-        Collection $collection
-    ) {
+    public function __construct(ContainerInterface $plugin) {
         $this->plugin = $plugin;
-        $this->collection = $collection;
+        $this->collection = $plugin->get('collection');
         $this->storage = $plugin->get('storage');
     }
 
@@ -65,7 +61,6 @@ class Runtime
     public function uploadDir(array $directories): array
     {
         $directories = $this->collection::make($directories);
-        $s3Url = join("://", ["s3", $this->plugin->get('storage.s3.config')->bucket]);
 
         return apply_filters('s3_directories', (
             $directories
@@ -80,17 +75,25 @@ class Runtime
                     $directories->get('basedir')
                 ))
                 ->put('url', str_replace(
-                    $s3Url,
+                    $this->s3Url(),
                     $this->plugin->get('storage.s3.config')->bucketUrl,
                     $directories->get('path')
                 ))
                 ->put('baseurl', str_replace(
-                    $s3Url,
+                    $this->s3Url(),
                     $this->plugin->get('storage.s3.config')->bucketUrl,
-                    $directories->get('path')
+                    $directories->get('basedir')
                 ))
                 ->toArray()
         ));
+    }
+
+    /**
+     * Get s3 URL
+     */
+    protected function s3Url(): string
+    {
+        return join('://', ['s3', $this->plugin->get('storage.s3.config')->bucket]);
     }
 
     /**
@@ -125,7 +128,8 @@ class Runtime
      */
     public function wpImageEditors($editors)
     {
-        if (($position = array_search('WP_Image_Editor_Imagick', $editors)) !== false) {
+        $position = array_search('WP_Image_Editor_Imagick', $editors);
+        if ($position !== false) {
             unset($editors[$position]);
         }
 
