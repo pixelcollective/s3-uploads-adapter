@@ -5,11 +5,15 @@
 		"composer/installers": "^1.9",
 		"league/flysystem-aws-s3-v3": "^1.0",
 		"php-di/php-di": "^6.1",
-		"tightenco/collect": "^7.11"
+		"tightenco/collect": "^7.11",
+		"infinum/eightshift-libs": "^2.2",
+		"johnbillion/wp-hooks": "^0.4.2",
+		"roots/support": "^1.0",
+		"illuminate/support": "^7.11"
    },
    "autoload": {
      "psr-4": {
-       "TinyPixel\\Uploads\\": "src/"
+       "TinyPixel\\Storage\\": "src/"
      }
    }
 }

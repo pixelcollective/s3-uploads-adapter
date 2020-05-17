@@ -9,16 +9,16 @@ Author URI: https://tinypixel.dev
 License: MIT
 */
 
-namespace TinyPixel;
+namespace TinyPixel\Storage;
 
-$plugin = require __DIR__ . '/bootstrap.php';
+$plugin = require __DIR__ . '/src/bootstrap.php';
 
 if (defined('WP_CLI') && WP_CLI) {
     \WP_CLI::add_command('s3', function() use ($plugin) {
-        return $plugin->get('cli');
+        return $plugin->get('plugin.cli');
     });
 }
 
 add_action('plugins_loaded', function () use ($plugin) {
-    $plugin->get('uploads')->init();
+    $plugin->get('plugin')->applyFilters($plugin);
 });

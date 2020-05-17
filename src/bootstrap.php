@@ -4,10 +4,13 @@
  * The bootstrap file creates and returns the container.
  */
 
-require __DIR__ . '/vendor/autoload.php';
+if (! $autoload = realpath(__DIR__ . '/../vendor/autoload.php')) {
+    throw new \WP_Error('autoload_not_found');
+}
+
+require __DIR__ . '/../vendor/autoload.php';
 
 use function DI\autowire;
-use function DI\create;
 use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
 use Illuminate\Support\Collection;
@@ -20,27 +23,42 @@ use League\Flysystem\Filesystem;
 $builder = new ContainerBuilder;
 
 $builder->addDefinitions([
-    'cli' => autowire('\TinyPixel\Uploads\UploadsCLI'),
-    'uploads' => autowire('\TinyPixel\Uploads\Uploads'),
-    'collection' => Collection::class,
-    'paths.upload' => (object) wp_upload_dir(),
-    'paths.content' => WP_CONTENT_DIR,
-    'paths.plugin' => realpath(__DIR__ . '/../'),
+    'plugin' => autowire('\TinyPixel\Storage\Runtime'),
+    'plugin.cli' => autowire('\TinyPixel\Storage\CLI\Commands'),
+    'plugin.editor' => autowire('\TinyPixel\Storage\ImageEditor\Editor'),
+    'illuminate.support.collection' => Collection::class,
+    'plugin.namespace' => 'tiny-pixel',
+    'plugin.fs.upload' => (object) wp_upload_dir(),
+    'plugin.fs.content' => WP_CONTENT_DIR,
+    'plugin.fs.baseDir' => realpath(__DIR__ . '/../'),
     'wp.includes.file' => function () {
         if (! function_exists('wp_tempnam')) {
             require_once(ABSPATH . 'wp-admin/includes/file.php');
         }
     },
+    'wp.filters' => function (ContainerInterface $plugin) {
+        if (! $filters = wp_cache_get('filters', $plugin->get('plugin.namespace'))) {
+            $filters = $plugin->get('illuminate.support.collection')::make(
+                json_decode(file_get_contents(
+                    "{$plugin->get('plugin.fs.baseDir')}/vendor/johnbillion/wp-hooks/hooks/filters.json"
+                ))
+            );
+
+            wp_cache_add('filters', $filters, $plugin->get('plugin.namespace'));
+        }
+
+        return $filters;
+    },
     'storage' => function (ContainerInterface $plugin) {
         return new MountManager([
-            'local' => new Filesystem($plugin->get('storage.adapters.local')),
-            's3' => new Filesystem($plugin->get('storage.adapters.s3')),
+            'local' => new Filesystem($plugin->get('storage.local')),
+            's3' => new Filesystem($plugin->get('storage.s3')),
         ]);
     },
-    'storage.adapters.local' => function (ContainerInterface $plugin) {
-        return new Local($plugin->get('paths.content'));
+    'storage.local' => function (ContainerInterface $plugin) {
+        return new Local($plugin->get('plugin.fs.content'));
     },
-    'storage.adapters.s3' => function (ContainerInterface $plugin) {
+    'storage.s3' => function (ContainerInterface $plugin) {
         return new AwsS3Adapter(
             $plugin->get('storage.s3.client'),
             $plugin->get('storage.s3.config')->bucket,
@@ -56,9 +74,11 @@ $builder->addDefinitions([
             ],
             'region' => $plugin->get('storage.s3.config')->region,
             'endpoint' => $plugin->get('storage.s3.config')->endpoint,
+            'csm' => $plugin->get('storage.s3.config')->csm,
         ]);
     },
     'storage.s3.config' => (object) [
+        'csm' => defined('S3_CSM') ? S3_CSM : false,
         'region' => defined('S3_REGION') ? S3_REGION : null,
         'bucket' => defined('S3_BUCKET') ? S3_BUCKET : null,
         'key' => defined('S3_KEY') ? S3_KEY : null,
@@ -67,7 +87,6 @@ $builder->addDefinitions([
         'signature' => defined('S3_SIGNATURE') ? S3_SIGNATURE : 'v4',
         'bucketPath' => defined('S3_BUCKET_PATH') ? S3_BUCKET_PATH : "s3://" . S3_BUCKET . "/app",
         'bucketUrl' => defined('S3_BUCKET_URL') ? S3_BUCKET_URL : "https://" . S3_BUCKET . ".cdn.digitaloceanspaces.com",
-        'editor' => '\\TinyPixel\\Uploads\\ImageEditorImagick',
     ],
 ]);
 

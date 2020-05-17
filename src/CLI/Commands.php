@@ -1,48 +1,34 @@
 <?php
-namespace TinyPixel\Uploads;
+namespace TinyPixel\Storage;
 
 use \WP_CLI;
-use \WP_CLI_Command;
-use League\Flysystem\Filesystem;
 use Psr\Container\ContainerInterface;
-use TinyPixel\Uploads\Uploads;
 
 /**
  * S3 Uploads CLI
- *
- * @package TinyPixel\Uploads
  */
-class UploadsCLI extends WP_CLI_Command
+class Commands extends \WP_CLI_Command
 {
     /**
      * Class constructor.
      */
     public function __construct(ContainerInterface $plugin)
     {
-        $this->plugin = $plugin;
-        $this->storage = $plugin->get('storage');
-
-        $this->plugin->get('collection')::make(
-            $this->storage->listContents('s3://')
-        )->each(function ($item) {
-            dump($item);
-            WP_CLI::line("{$item['path']} ({$item['type']})");
-        });
+        self::$plugin = $plugin;
+        self::$storage = $plugin->get('storage');
     }
 
     /**
      * List files in the S3 bucket
      *
-     * @param  array command arguments
      * @return void
      */
-    public function ls(array $args) : void
+    public function ls() : void
     {
         try {
-            $this->plugin->get('collection')::make(
-                $this->storage->listContents('s3://')
+            self::$plugin->get('collection')::make(
+                self::$storage->listContents('s3://')
             )->each(function ($item) {
-                dump($item);
                 WP_CLI::line("{$item['path']} ({$item['type']})");
             });
         } catch (FilesystemError $exception) {

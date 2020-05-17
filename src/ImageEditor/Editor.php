@@ -1,17 +1,14 @@
 <?php
 
-namespace TinyPixel\Uploads;
+namespace TinyPixel\Storage\ImageEditor;
 
 use \Imagick;
-use \WP_Image_Editor_Imagick;
 use \WP_Error;
 
 /**
- * Image Editor Imagick
- *
- * @package TinyPixel\Uploads
+ * Image Editor
  */
-class ImageEditorImagick extends WP_Image_Editor_Imagick
+class Editor extends \WP_Image_Editor_Imagick
 {
     /** \Imagick */
     protected $image;

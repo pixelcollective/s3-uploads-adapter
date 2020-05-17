@@ -1,17 +1,18 @@
 <?php
 
-namespace TinyPixel\Uploads;
+namespace TinyPixel\Storage;
 
 use Psr\Container\ContainerInterface;
 use Illuminate\Support\Collection;
+use TinyPixel\Storage\Traits\Filters;
 
 /**
- * S3 Uploads
- *
- * @package TinyPixel\Uploads
+ * The plugin runtime.
  */
-class Uploads
+class Runtime
 {
+    use Filters;
+
     /** Psr\Container\ContainerInterface */
     public $plugin;
 
@@ -30,19 +31,29 @@ class Uploads
     }
 
     /**
-     * Initialize class.
+     * Remove filters.
      *
-     * @return void
+     * @return array
      */
-    public function init(): void
+    public function removeFilters(): array
     {
-        add_filter('upload_dir', [$this, 'filterUploadDir']);
-        add_filter('wp_image_editors', [$this, 'filterEditors'], 9);
-        add_filter('wp_read_image_metadata', [$this, 'filterMetadata'], 10, 2);
-        add_filter('wp_resource_hints', [$this, 'filterResourceHints'], 10, 2);
-        add_action('delete_attachment', [$this, 'deleteAttachment']);
-        add_action('wp_handle_sideload_prefilter', [$this, 'sideload']);
-        remove_filter('admin_notices', 'wpthumb_errors');
+        return ['admin_notices' => 'wpthumb_errors'];
+    }
+
+    /**
+     * Associate filter arguments with class methods.
+     *
+     * @return array
+     */
+    public function setArgs(): array
+    {
+        return [
+            'uploadDir' => [9],
+            'wpImageEditors' => [9],
+            'wpResourcesHints' => [10, 2],
+            'deleteAttachment' => [10, 2],
+            'wpReadImageMetadata' => [10, 2],
+        ];
     }
 
     /**
@@ -51,7 +62,7 @@ class Uploads
      * @param  array dirs
      * @return array
      */
-    public function filterUploadDir(array $directories): array
+    public function uploadDir(array $directories): array
     {
         $directories = $this->collection::make($directories);
         $s3Url = join("://", ["s3", $this->plugin->get('storage.s3.config')->bucket]);
@@ -59,12 +70,12 @@ class Uploads
         return apply_filters('s3_directories', (
             $directories
                 ->put('path', str_replace(
-                    $this->plugin->get('paths.content'),
+                    $this->plugin->get('plugin.fs.content'),
                     $this->plugin->get('storage.s3.config')->bucketPath,
                     $directories->get('path')
                 ))
                 ->put('basedir', str_replace(
-                    $this->plugin->get('paths.content'),
+                    $this->plugin->get('plugin.fs.content'),
                     $this->plugin->get('storage.s3.config')->bucketPath,
                     $directories->get('basedir')
                 ))
@@ -92,9 +103,7 @@ class Uploads
     {
         $attachment = (object) [
             'source' => get_attached_file($postId),
-            'sizes' => $this->plugin->get('collection')::make(
-                wp_get_attachment_metadata($postId)['sizes']
-            ),
+            'sizes' => $this->collection::make(wp_get_attachment_metadata($postId)['sizes']),
         ];
 
         $attachment->sizes->each(
@@ -109,31 +118,29 @@ class Uploads
     }
 
     /**
-     * Filter wordpress editors.
+     * Wordpress editors.
      *
      * @param  array editors
      * @return array editors
      */
-    public function filterEditors($editors)
+    public function wpImageEditors($editors)
     {
         if (($position = array_search('WP_Image_Editor_Imagick', $editors)) !== false) {
             unset($editors[$position]);
         }
 
-        array_unshift($editors, $this->editor);
+        array_unshift($editors, $this->plugin->get('plugin.editor'));
 
         return $editors;
     }
 
     /**
-     * Copy the file from /tmp to an s3 dir so handle_sideload doesn't fail due to
-     * trying to do a rename() on the file cross streams. This is somewhat of a hack
-     * to work around the core issue https://core.trac.wordpress.org/ticket/29257
+     * Sideload prefilter.
      *
      * @param  array File array
      * @return array
      */
-    public function sideload(array $file): array
+    public function wpHandleSideloadPrefilter(array $file): array
     {
         $file = (object) $file;
 
@@ -151,15 +158,13 @@ class Uploads
     }
 
     /**
-     * Filters wp_read_image_metadata. exif_read_data() doesn't work on
-     * file streams so we need to make a temporary local copy to extract
-     * exif data from.
+     * Read image metadata.
      *
      * @param array  $meta
      * @param string $file
      * @return array|bool
      */
-    public function filterMetadata($meta, $file)
+    public function wpReadImageMetadata($meta, $file)
     {
         remove_filter('wp_read_image_metadata', [$this, 'filterMetadata'], 10);
 
@@ -179,7 +184,7 @@ class Uploads
      * @param $relation
      * @return array
      */
-    public function filterResourceHints(array $hints, string $relation): array
+    public function wpResourceHints(array $hints = [], string $relation = ''): array
     {
         $relation === 'dns-prefetch' && array_push($hints, ...[
             $this->plugin->get('storage.s3.config')->bucketUrl
