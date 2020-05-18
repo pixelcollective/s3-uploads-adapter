@@ -4,39 +4,36 @@ namespace TinyPixel\Storage\Traits;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
-use Psr\Container\ContainerInterface;
 
 /**
  * Filters
  */
 trait Filters
 {
-    /** @var */
-    public $args = [];
-
     /**
      * Instantiate filters.
+     *
+     * @param  Collection
+     * @return void
      */
-    public function applyFilters(ContainerInterface $container)
+    public function applyFilters(Collection $filters)
     {
-        $container->get('wp.filters')->each(function ($filter) {
+        $filters->each(function ($filter) {
             if (method_exists($this, $method = Str::camel($filter->name))) {
-                add_filter($filter->name, [$this, $method], ...$this->getArgs($method));
+                add_filter($filter->name, [$this, $method], $this->getFilterArgs($method));
             }
         });
     }
 
     /**
-     * Get filter arguments merged from class properties
-     * and whatever array values are returned from setArgs
+     * Get any additional arguments
      *
-     * @return array
+     * @param  string
+     * @return array|null
      */
-    protected function getArgs(string $key): array
+    protected function getFilterArgs(string $key)
     {
-        $this->args = Collection::make($this->args)->mergeRecursive($this->setArgs());
-
-        return $this->args->has($key) ? $this->args->get($key) : [];
+        return trait_exists('HookArguments', false) ? $this->getHookArguments($key) : null;
     }
 
     /**

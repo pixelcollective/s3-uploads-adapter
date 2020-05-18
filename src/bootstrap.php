@@ -24,17 +24,20 @@ use League\Flysystem\MountManager;
 use League\Flysystem\Filesystem;
 use TinyPixel\Storage\Plugin;
 use TinyPixel\Storage\CLI;
-use TinyPixel\Storage\ImageEditor;
+use TinyPixel\Storage\ImageEditor\ImagickEditor;
 
 /**
  * Build the plugin container.
  */
-
 $builder = new ContainerBuilder;
 
+/** Minimal config */
 $builder->useAutowiring(false);
 $builder->useAnnotations(false);
 
+/**
+ * Container definitions
+ */
 $builder->addDefinitions([
     /**
      * Plugin resolvers
@@ -42,10 +45,9 @@ $builder->addDefinitions([
     'plugin' => function (ContainerInterface $plugin) {
         return new Plugin\Runtime($plugin);
     },
-    'plugin.editor' => function (ContainerInterface $plugin) {
-        return new ImageEditor\Editor($plugin);
+    'plugin.imagickEditor' => function (ContainerInterface $plugin) {
+        return new ImagickEditor($plugin);
     },
-
     /**
      * Plugin CLI resolvers
      */
@@ -58,47 +60,43 @@ $builder->addDefinitions([
     'plugin.cli.s3' => function (ContainerInterface $plugin) {
         return new CLI\S3($plugin);
     },
-
     /**
-     * Illuminate
+     * Illuminate support components
      */
     'collection' => Collection::class,
     'str' => Str::class,
-
     /**
      * Flysystem
      */
-    'storage' => function (ContainerInterface $plugin) {
+    'disks' => function (ContainerInterface $plugin) {
         return new MountManager([
-            'local' => new Filesystem($plugin->get('storage.filesystem.local')),
-            's3' => $plugin->get('storage.filesystem.s3'),
+            'local' => new Filesystem($plugin->get('disk.local')),
+            's3' => $plugin->get('disk.s3'),
         ]);
     },
-    'storage.filesystem.local' => function (ContainerInterface $plugin) {
-        return new Local($plugin->get('plugin.fs.content'));
+    'disk.local' => new Local(WP_CONTENT_DIR),
+    'disk.s3' => function (ContainerInterface $plugin) {
+        return new Filesystem($plugin->get('disk.s3.adapter'));
     },
-    'storage.filesystem.s3' => function (ContainerInterface $plugin) {
-        return new Filesystem($plugin->get('storage.s3.adapter'));
-    },
-    'storage.s3.adapter' => function (ContainerInterface $plugin) {
+    'disk.s3.adapter' => function (ContainerInterface $plugin) {
         return new AwsS3Adapter(
-            $plugin->get('storage.s3.client'),
-            $plugin->get('storage.s3.config')->bucket,
+            $plugin->get('disk.s3.client'),
+            $plugin->get('disk.s3.config')->bucket,
             'app'
         );
     },
-    'storage.s3.client' => function (ContainerInterface $plugin) {
+    'disk.s3.client' => function (ContainerInterface $plugin) {
         return new S3Client([
             'version' => 'latest',
             'credentials' => [
-                'key' => $plugin->get('storage.s3.config')->key,
-                'secret' => $plugin->get('storage.s3.config')->secret,
+                'key' => $plugin->get('disk.s3.config')->key,
+                'secret' => $plugin->get('disk.s3.config')->secret,
             ],
-            'region' => $plugin->get('storage.s3.config')->region,
-            'endpoint' => $plugin->get('storage.s3.config')->endpoint,
+            'region' => $plugin->get('disk.s3.config')->region,
+            'endpoint' => $plugin->get('disk.s3.config')->endpoint,
         ]);
     },
-    'storage.s3.config' => (object) [
+    'disk.s3.config' => (object) [
         'region' => defined('S3_REGION') ? S3_REGION : null,
         'bucket' => defined('S3_BUCKET') ? S3_BUCKET : null,
         'key' => defined('S3_KEY') ? S3_KEY : null,
@@ -108,37 +106,56 @@ $builder->addDefinitions([
         'bucketPath' => defined('S3_BUCKET_PATH') ? S3_BUCKET_PATH : "s3://" . S3_BUCKET . "/app",
         'bucketUrl' => defined('S3_BUCKET_URL') ? S3_BUCKET_URL : 'https://' . join('.', [S3_BUCKET, S3_REGION, 'cdn.digitaloceanspaces.com']),
     ],
+    'fs' => function (ContainerInterface $plugin) {
+        $wp = (object) wp_upload_dir();
 
+        $local = (object) $plugin->get('collection')::make($wp)
+            ->put('path', str_replace(WP_CONTENT_DIR, "local:/", $wp->path))
+            ->put('basedir', str_replace(WP_CONTENT_DIR, 'local:/', $wp->basedir))
+            ->toArray();
+
+        $s3 = (object) $plugin->get('collection')::make($wp)
+            ->put('path', str_replace(
+                'local://',
+                's3://' . $plugin->get('disk.s3.config')->bucket . '/',
+                $local->path
+            ))
+            ->put('basedir', str_replace(
+                'local://',
+                $plugin->get('disk.s3.config')->bucketPath . '/',
+                $local->basedir
+            ))
+            ->put('url', str_replace(
+                home_url(),
+                $plugin->get('disk.s3.config')->bucketUrl,
+                $local->url
+            ))
+            ->put('baseurl', str_replace(
+                home_url(),
+                $plugin->get('disk.s3.config')->bucketUrl,
+                $local->baseurl
+            ))
+            ->toArray();
+
+        return (object) [
+            'wp' => $wp,
+            's3' => $s3,
+            'local' => $local
+        ];
+    },
     /**
      * Configuration
      */
+    'plugin.baseDir' => realpath(__DIR__ . '/../'),
     'plugin.namespace' => 'tiny-pixel',
-    'plugin.fs.upload' => (object) wp_upload_dir(),
-    'plugin.fs.content' => WP_CONTENT_DIR,
-    'plugin.fs.baseDir' => realpath(__DIR__ . '/../'),
-
+    /**
+     * WP bindings
+     */
     'wp.cli' => WP_CLI::class,
     'wp.includes.file' => function () {
         if (! function_exists('wp_tempnam')) {
             require_once(ABSPATH . 'wp-admin/includes/file.php');
         }
-    },
-
-    /**
-     * Cached filters
-     */
-    'wp.filters' => function (ContainerInterface $plugin) {
-        if (! $filters = wp_cache_get('filters', $plugin->get('plugin.namespace'))) {
-            $filters = $plugin->get('collection')::make(
-                json_decode(file_get_contents(
-                    "{$plugin->get('plugin.fs.baseDir')}/vendor/johnbillion/wp-hooks/hooks/filters.json"
-                ))
-            );
-
-            wp_cache_add('filters', $filters, $plugin->get('plugin.namespace'));
-        }
-
-        return $filters;
     },
 ]);
 

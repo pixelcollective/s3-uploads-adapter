@@ -14,7 +14,7 @@ namespace TinyPixel\Storage;
 $plugin = require __DIR__ . '/src/bootstrap.php';
 
 add_action('plugins_loaded', function () use ($plugin) {
-    $plugin->get('plugin')->applyFilters($plugin);
+    $plugin->get('plugin');
 });
 
 if (defined('WP_CLI') && $cli = $plugin->get('wp.cli')) {

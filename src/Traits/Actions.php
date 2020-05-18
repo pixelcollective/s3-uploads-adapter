@@ -2,6 +2,7 @@
 
 namespace TinyPixel\Storage\Traits;
 
+use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 
 /**
@@ -10,16 +11,41 @@ use Illuminate\Support\Collection;
 trait Actions
 {
     /**
-     * Instantiate actions.
+     * Instantiate filters.
+     *
+     * @param  Collection
+     * @return void
      */
-    public function instantiateActions(Collection $collection)
+    public function applyActions(Collection $actions): void
     {
-        $this->actions = $collection::make(
-            json_decode(file_get_contents("{$this->getBaseDir()}/vendor/johnbillion/wp-hooks/hooks/actions.json"))
-        )->each(function ($action) {
-            if (method_exists($this, $action->name)) {
-                add_filter($action->name, [$this, $action->name]);
+        $actions->each(function ($filter) {
+            if (method_exists($this, $method = Str::camel($filter->name))) {
+                add_action($filter->name, [$this, $method], $this->getActionArgs($method));
             }
         });
+    }
+
+    /**
+     * Get any additional arguments
+     *
+     * @param  string
+     * @return array|null
+     */
+    protected function getActionArgs(string $key)
+    {
+        return trait_exists('HookArguments', false) ? $this->getHookArguments($key) : null;
+    }
+
+    /**
+     * Remove filters.
+     *
+     * @param  array
+     * @return void
+     */
+    protected function removeActions(array $filters): void
+    {
+        foreach($filters as $k => $v) {
+            remove_action($k, $v);
+        }
     }
 }

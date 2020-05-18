@@ -3,15 +3,12 @@
 namespace TinyPixel\Storage\Plugin;
 
 use Psr\Container\ContainerInterface;
-use TinyPixel\Storage\Traits\Filters;
 
 /**
  * The plugin runtime.
  */
 class Runtime
 {
-    use Filters;
-
     /** Psr\Container\ContainerInterface */
     public $plugin;
 
@@ -23,101 +20,62 @@ class Runtime
     public function __construct(ContainerInterface $plugin) {
         $this->plugin = $plugin;
         $this->collection = $plugin->get('collection');
-        $this->storage = $plugin->get('storage');
+        $this->disks = $plugin->get('disks');
+
+        add_action('add_attachment', [$this, 'addAttachment'], 20, 1);
+        add_filter('wp_generate_attachment_metadata', [$this, 'handleAttachmentMetadata'], 20, 2);
+        add_filter('wp_update_attachment_metadata', [$this, 'handleAttachmentMetadata'], 20, 2);
+        add_action('delete_attachment', [$this, 'deleteAttachment']);
+
+		add_filter('wp_image_editors', [$this, 'wpImageEditors'], 9);
+		add_filter('wp_read_image_metadata', [$this, 'wpReadImageMetadata'], 10, 2);
+        add_filter('wp_resource_hints', [$this, 'wpResourceHints'], 10, 2);
+
+        remove_filter('admin_notices', 'wpthumb_errors');
     }
 
     /**
-     * Remove filters.
-     *
-     * @return array
+     * Format a WordPress attachment as an s3 object
      */
-    public function removeFilters(): array
+    public function attachment(string $file)
     {
-        return ['admin_notices' => 'wpthumb_errors'];
-    }
+        $fs = $this->plugin->get('fs');
 
-    /**
-     * Associate filter arguments with class methods.
-     *
-     * @return array
-     */
-    public function setArgs(): array
-    {
-        return [
-            'uploadDir' => [9],
-            'wpImageEditors' => [9],
-            'wpResourcesHints' => [10, 2],
-            'deleteAttachment' => [10, 2],
-            'wpReadImageMetadata' => [10, 2],
+        return (object) [
+            's3' => str_replace($fs->wp->basedir, $fs->s3->basedir, $file),
+            'local' => str_replace($fs->wp->basedir, $fs->local->basedir, $file),
         ];
     }
 
     /**
-     * Filter uploads dir.
+     * Add attachment
      *
-     * @param  array dirs
+     * @param  array
+     * @param  int
      * @return array
      */
-    public function uploadDir(array $directories): array
+    public function addAttachment(int $postId)
     {
-        $directories = $this->collection::make($directories);
+        $file = $this->attachment(get_attached_file($postId, true));
 
-        return apply_filters('s3_directories', (
-            $directories
-                ->put('path', str_replace(
-                    $this->plugin->get('plugin.fs.content'),
-                    $this->plugin->get('storage.s3.config')->bucketPath,
-                    $directories->get('path')
-                ))
-                ->put('basedir', str_replace(
-                    $this->plugin->get('plugin.fs.content'),
-                    $this->plugin->get('storage.s3.config')->bucketPath,
-                    $directories->get('basedir')
-                ))
-                ->put('url', str_replace(
-                    $this->s3Url(),
-                    $this->plugin->get('storage.s3.config')->bucketUrl,
-                    $directories->get('path')
-                ))
-                ->put('baseurl', str_replace(
-                    $this->s3Url(),
-                    $this->plugin->get('storage.s3.config')->bucketUrl,
-                    $directories->get('basedir')
-                ))
-                ->toArray()
-        ));
+        if (! $this->disks->has($file->s3)) {
+            $this->disks->copy($file->local, $file->s3);
+            $this->disks->delete($file->local);
+        }
+
+        return $file->s3;
     }
 
     /**
-     * Get s3 URL
+     * Handle attachment metadata
      */
-    protected function s3Url(): string
+    public function handleAttachmentMetadata($file, $postId): array
     {
-        return join('://', ['s3', $this->plugin->get('storage.s3.config')->bucket]);
-    }
+        $this->collection::make($file['sizes'])->each(function ($size) {
+            // ...
+        });
 
-    /**
-     * Delete attachment files from S3
-     *
-     * @param  int postId
-     * @return void
-     */
-    public function deleteAttachment(int $postId): void
-    {
-        $attachment = (object) [
-            'source' => get_attached_file($postId),
-            'sizes' => $this->collection::make(wp_get_attachment_metadata($postId)['sizes']),
-        ];
-
-        $attachment->sizes->each(
-            function ($size) use ($attachment) {
-                $this->plugin->get('fs.cloud')->delete(
-                    str_replace(basename($attachment), $size['file'], $attachment)
-                );
-            }
-        );
-
-        $this->plugin->get('fs.cloud')->delete($attachment);
+        return $file;
     }
 
     /**
@@ -133,53 +91,9 @@ class Runtime
             unset($editors[$position]);
         }
 
-        array_unshift($editors, $this->plugin->get('plugin.editor'));
+        array_unshift($editors, '\TinyPixel\Storage\ImageEditor\ImagickEditor');
 
         return $editors;
-    }
-
-    /**
-     * Sideload prefilter.
-     *
-     * @param  array File array
-     * @return array
-     */
-    public function wpHandleSideloadPrefilter(array $file): array
-    {
-        $file = (object) $file;
-
-        $writePath = join('/', [
-            $this->plugin->get('paths.upload')->baseDir,
-            'tmp',
-            basename($file->tmp_name),
-        ]);
-
-        $this->storage->copy($file->tmp_name, $writePath);
-        $this->storage->delete($file->tmp_name);
-
-        $file->tmp_name = $writePath;
-
-        return (array) $file;
-    }
-
-    /**
-     * Read image metadata.
-     *
-     * @param array  $meta
-     * @param string $file
-     * @return array|bool
-     */
-    public function wpReadImageMetadata($meta, $file)
-    {
-        remove_filter('wp_read_image_metadata', [$this, 'filterMetadata'], 10);
-
-        if ($tmp = $this->copyImageFromS3($file)) {
-            $meta = wp_read_image_metadata($tmp);
-            add_filter('wp_read_image_metadata', [$this, 'filterMetadata'], 10, 2);
-            $this->storage->delete($tmp);
-        }
-
-        return $meta;
     }
 
     /**
@@ -191,24 +105,11 @@ class Runtime
      */
     public function wpResourceHints(array $hints = [], string $relation = ''): array
     {
-        $relation === 'dns-prefetch'
-            && array_push($hints, ...[$this->plugin->get('storage.s3.config')->bucketUrl]);
+        $relation === 'dns-prefetch' && array_push(
+            $hints,
+            $this->plugin->get('disk.s3.config')->bucketUrl
+        );
 
         return $hints;
-    }
-
-    /**
-     * Get a local copy of the file.
-     *
-     * @param  string $file
-     * @return string
-     */
-    public function copyImageFromS3(string $file): string
-    {
-        $this->plugin->make('wp.includes.file');
-
-        $this->storage->copy($file, wp_tempnam($file));
-
-        return wp_tempnam($file);
     }
 }
