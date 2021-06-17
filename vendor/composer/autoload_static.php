@@ -40,10 +40,6 @@ class ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb
             'GuzzleHttp\\Promise\\' => 19,
             'GuzzleHttp\\' => 11,
         ),
-        'C' => 
-        array (
-            'Composer\\Installers\\' => 20,
-        ),
         'A' => 
         array (
             'Aws\\' => 4,
@@ -83,10 +79,6 @@ class ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
-        'Composer\\Installers\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
-        ),
         'Aws\\' => 
         array (
             0 => __DIR__ . '/..' . '/aws/aws-sdk-php/src',
@@ -97,6 +89,7 @@ class ComposerStaticInite42bb0d00d4d90a6d6848c1168dcb5bb
         'AMFReader' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.flv.php',
         'AMFStream' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.flv.php',
         'AVCSequenceParameterSetReader' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.flv.php',
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Image_XMP' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.tag.xmp.php',
         'getID3' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/getid3.php',
         'getID3_cached_dbm' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/extension.cache.dbm.php',

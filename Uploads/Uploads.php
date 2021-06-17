@@ -15,6 +15,11 @@ class Uploads
     /** @var TinyPixel\Uploads\Uploads */
     private static $instance;
 
+    public $acl = 'public-read';
+    public $local = false;
+    public $region = null;
+    public $version = 'latest';
+
     /**
      * Singleton constructor.
      *
@@ -34,8 +39,10 @@ class Uploads
      */
     public function __construct()
     {
-        $this->acl = defined('S3_UPLOADS_OBJECT_ACL') ? S3_UPLOADS_OBJECT_ACL : 'public-read';
-        $this->local = defined('S3_UPLOADS_USE_LOCAL') ? S3_UPLOADS_USE_LOCAL : false;
+        if (defined('S3_UPLOADS_OBJECT_ACL')) $this->acl = S3_UPLOADS_OBJECT_ACL;
+        if (defined('S3_UPLOADS_USE_LOCAL')) $this->local = S3_UPLOADS_USE_LOCAL;
+        if (defined('S3_UPLOADS_REGION')) $this->region = S3_UPLOADS_REGION;
+
         $this->region = defined('S3_UPLOADS_REGION') ? S3_UPLOADS_REGION : null;
         $this->bucket = defined('S3_UPLOADS_BUCKET') ? S3_UPLOADS_BUCKET : null;
         $this->key = defined('S3_UPLOADS_KEY') ? S3_UPLOADS_KEY : null;
@@ -114,18 +121,19 @@ class Uploads
     public function configureClient(): void
     {
         $clientParams = apply_filters('s3_uploads_s3_client_params', [
-            'version' => "latest",
+            'version' => $this->version,
             'signature' => $this->signature,
             'region' => $this->region,
             'endpoint' => $this->endpoint,
             'csm' => false,
+            'use_arn_region' => false,
             'credentials' => [
                 'key' => $this->key,
                 'secret' => $this->secret,
             ],
         ]);
 
-        $this->client = S3Client::factory($clientParams);
+        $this->client = new S3Client($clientParams);
     }
 
     /**
