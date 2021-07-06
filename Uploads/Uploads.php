@@ -7,18 +7,13 @@ use TinyPixel\Uploads\StreamWrapper;
 
 /**
  * S3 Uploads
- *
- * @package TinyPixel\Uploads
  */
 class Uploads
 {
-    /** @var TinyPixel\Uploads\Uploads */
+    /** 
+     * @var TinyPixel\Uploads\Uploads 
+     */
     private static $instance;
-
-    public $acl = 'public-read';
-    public $local = false;
-    public $region = null;
-    public $version = 'latest';
 
     /**
      * Singleton constructor.
@@ -39,10 +34,8 @@ class Uploads
      */
     public function __construct()
     {
-        if (defined('S3_UPLOADS_OBJECT_ACL')) $this->acl = S3_UPLOADS_OBJECT_ACL;
-        if (defined('S3_UPLOADS_USE_LOCAL')) $this->local = S3_UPLOADS_USE_LOCAL;
-        if (defined('S3_UPLOADS_REGION')) $this->region = S3_UPLOADS_REGION;
-
+        $this->acl = defined('S3_UPLOADS_OBJECT_ACL') ? S3_UPLOADS_OBJECT_ACL : 'public-read';
+        $this->local = defined('S3_UPLOADS_USE_LOCAL') ? S3_UPLOADS_USE_LOCAL : false;
         $this->region = defined('S3_UPLOADS_REGION') ? S3_UPLOADS_REGION : null;
         $this->bucket = defined('S3_UPLOADS_BUCKET') ? S3_UPLOADS_BUCKET : null;
         $this->key = defined('S3_UPLOADS_KEY') ? S3_UPLOADS_KEY : null;
@@ -61,27 +54,6 @@ class Uploads
      */
     public function setup(): void
     {
-        $this->filterParameters();
-        $this->configureClient();
-        $this->registerStreamWrapper();
-
-        add_filter('upload_dir', [$this, 'filterUploadDir']);
-        add_filter('wp_image_editors', [$this, 'filterEditors'], 9);
-        add_filter('wp_read_image_metadata', [$this, 'filterMetadata'], 10, 2);
-        add_filter('wp_resource_hints', [$this, 'filterResourceHints'], 10, 2);
-        add_action('delete_attachment', [$this, 'deleteAttachment']);
-        add_action('wp_handle_sideload_prefilter', [$this, 'sideload']);
-
-        remove_filter('admin_notices', 'wpthumb_errors');
-    }
-
-    /**
-     * Filter parameters
-     *
-     * @return void
-     */
-    public function filterParameters(): void
-    {
         $this->acl = apply_filters('s3_media_acl', $this->acl);
         $this->local = apply_filters('s3_media_local', $this->local);
         $this->region = apply_filters('s3_media_region', $this->region);
@@ -93,6 +65,18 @@ class Uploads
         $this->bucketPath = apply_filters('s3_media_bucket_path', $this->bucketPath);
         $this->bucketUrl  = apply_filters('s3_media_bucket_url', $this->bucketUrl);
         $this->editor  = apply_filters('s3_media_editor', $this->editor);
+
+        $this->configureClient();
+        $this->registerStreamWrapper();
+
+        add_filter('upload_dir', [$this, 'filterUploadDir']);
+        add_filter('wp_image_editors', [$this, 'filterEditors'], 9);
+        add_filter('wp_read_image_metadata', [$this, 'filterMetadata'], 10, 2);
+        add_filter('wp_resource_hints', [$this, 'filterResourceHints'], 10, 2);
+        add_action('delete_attachment', [$this, 'deleteAttachment']);
+        add_action('wp_handle_sideload_prefilter', [$this, 'sideload']);
+
+        remove_filter('admin_notices', 'wpthumb_errors');
     }
 
     /**
@@ -121,12 +105,11 @@ class Uploads
     public function configureClient(): void
     {
         $clientParams = apply_filters('s3_uploads_s3_client_params', [
-            'version' => $this->version,
+            'version' => "latest",
             'signature' => $this->signature,
             'region' => $this->region,
             'endpoint' => $this->endpoint,
             'csm' => false,
-            'use_arn_region' => false,
             'credentials' => [
                 'key' => $this->key,
                 'secret' => $this->secret,
@@ -158,7 +141,7 @@ class Uploads
      */
     public function filterUploadDir(array $dirs): array
     {
-        $this->originalUploadDir = $dirs;
+        $this->localUploadDir = $dirs;
 
         $dirs['path']    = str_replace(WP_CONTENT_DIR, $this->bucketPath, $dirs['path']);
         $dirs['basedir'] = str_replace(WP_CONTENT_DIR, $this->bucketPath, $dirs['basedir']);
@@ -166,7 +149,7 @@ class Uploads
         $dirs['url']     = str_replace("s3://{$this->bucket}", $this->bucketUrl, $dirs['path']);
         $dirs['baseurl'] = str_replace("s3://{$this->bucket}", $this->bucketUrl, $dirs['basedir']);
 
-        return apply_filters('sup_uploads_dirs', $dirs);
+        return apply_filters('s3_uploads_dirs', $dirs);
     }
 
     /**
@@ -294,19 +277,5 @@ class Uploads
 
         copy($file, $temp);
         return $temp;
-    }
-
-    /**
-     * Get original upload dir
-     *
-     * @return array
-     */
-    public function getOriginalUploadDir(): array
-    {
-        if (empty($this->originalUploadDir)) {
-            return $this->originalUploadDir = wp_upload_dir();
-        }
-
-        return $this->originalUploadDir;
     }
 }
