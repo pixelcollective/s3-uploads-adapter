@@ -120,15 +120,16 @@ class Uploads
     public function configureClient(): void
     {
         $clientParams = apply_filters('s3_uploads_s3_client_params', [
-            'version' => "latest",
-            'signature' => $this->signature,
-            'region' => $this->region,
-            'endpoint' => $this->endpoint,
-            'csm' => false,
             'credentials' => [
                 'key' => $this->key,
                 'secret' => $this->secret,
             ],
+            'csm' => false,
+            'use_aws_shared_config_files' => false,
+            'endpoint' => $this->endpoint,
+            'region' => $this->region,
+            'signature' => $this->signature,
+            'version' => 'latest',
         ]);
 
         $this->client = new S3Client($clientParams);
@@ -158,10 +159,10 @@ class Uploads
     {
         $this->localUploadDir = $dirs;
 
-        $dirs['path']    = str_replace(WP_CONTENT_DIR, $this->bucketPath, $dirs['path']);
+        $dirs['path'] = str_replace(WP_CONTENT_DIR, $this->bucketPath, $dirs['path']);
         $dirs['basedir'] = str_replace(WP_CONTENT_DIR, $this->bucketPath, $dirs['basedir']);
 
-        $dirs['url']     = str_replace("s3://{$this->bucket}", $this->bucketUrl, $dirs['path']);
+        $dirs['url'] = str_replace("s3://{$this->bucket}", $this->bucketUrl, $dirs['path']);
         $dirs['baseurl'] = str_replace("s3://{$this->bucket}", $this->bucketUrl, $dirs['basedir']);
 
         return apply_filters('s3_uploads_dirs', $dirs);
