@@ -14,6 +14,7 @@
 
 die('For security reasons, this demo has been disabled. It can be enabled by removing line '.__LINE__.' in demos/'.basename(__FILE__));
 
+
 define('GETID3_DEMO_BROWSE_ALLOW_EDIT_LINK',   false); // if enabled, shows "edit" links (to /demos/demo.write.php) to allow ID3/APE/etc tag editing on applicable file types
 define('GETID3_DEMO_BROWSE_ALLOW_DELETE_LINK', false); // if enabled, shows "delete" links to delete files from the browse interface
 define('GETID3_DEMO_BROWSE_ALLOW_MD5_LINK',    false); // if enabled, shows "enable" link for MD5 hashes for file/data/source
@@ -41,7 +42,10 @@ $writescriptfilename = 'demo.write.php';
 
 // Initialize getID3 engine
 $getID3 = new getID3;
-$getID3->setOption(array('encoding' => $PageEncoding));
+$getID3->setOption(array(
+	'encoding' => $PageEncoding,
+	'options_audiovideo_quicktime_ReturnAtomData' => true,
+));
 
 $getID3checkColor_Head           = 'CCCCDD';
 $getID3checkColor_DirectoryLight = 'FFCCCC';

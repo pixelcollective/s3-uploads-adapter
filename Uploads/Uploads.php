@@ -19,6 +19,16 @@ class Uploads
     public $local = false;
     public $region = null;
     public $version = 'latest';
+    public $client;
+    public $localUploadDir;
+    public $bucket;
+    public $key;
+    public $secret;
+    public $endpoint;
+    public $signature;
+    public $bucketPath;
+    public $bucketUrl;
+    public $editor;
 
     /**
      * Singleton constructor.
